@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Estate AI | Curated Property Discovery</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+    <div class="site-shell">
+        <header class="hero-shell">
+            <nav class="navbar">
+                <div class="nav-container">
+                    <a href="/" class="logo">
+                        <span class="logo-mark"><i class="fas fa-house-chimney-window"></i></span>
+                        <span>Real Estate AI</span>
+                    </a>
+                    <ul class="nav-links">
+                        <li><a href="#ai-agents">AI Agents</a></li>
+                        <li><a href="#search">Search</a></li>
+                        <li><a href="#properties">Listings</a></li>
+                        <li><a href="#recommendations">AI Picks</a></li>
+                        <li><a href="#agents">Agents</a></li>
+                    </ul>
+                    <div class="nav-actions">
+                        <button id="login-trigger" class="btn btn-ghost js-open-auth" data-auth-tab="login" type="button">Login</button>
+                        <button id="register-trigger" class="btn btn-primary js-open-auth" data-auth-tab="register" type="button">Create Account</button>
+                        <button id="logout-btn" class="btn btn-outline hidden" type="button">Logout</button>
+                    </div>
+                </div>
+            </nav>
+
+            <section class="hero container">
+                <div class="hero-copy">
+                    <span class="eyebrow">AI-guided discovery for modern buyers</span>
+                    <h1>Find a home with confidence, color, and clarity.</h1>
+                    <p>
+                        Browse thoughtfully ranked properties, compare neighborhoods quickly,
+                        and lean on recommendations shaped by real features instead of empty hype.
+                    </p>
+                    <div class="hero-actions">
+                        <a href="#search" class="btn btn-primary">Start Smart Search</a>
+                        <a href="#properties" class="btn btn-outline-light">Explore Listings</a>
+                    </div>
+                    <div id="auth-status" class="auth-status">
+                        Browse as a guest, or sign in to save favorites and unlock more tailored recommendations.
+                    </div>
+                </div>
+
+                <div class="hero-panel">
+                    <form id="hero-search-form" class="search-card">
+                        <div class="card-header">
+                            <span class="card-kicker">Live search</span>
+                            <h2>Your next move starts here</h2>
+                            <p>Search by city, budget, type, and bedrooms in one pass.</p>
+                        </div>
+                        <div class="search-grid">
+                            <label class="field">
+                                <span>Location</span>
+                                <input type="text" id="hero-location" placeholder="Austin, Chicago, Miami...">
+                            </label>
+                            <label class="field">
+                                <span>Min Price</span>
+                                <input type="number" id="hero-min-price" placeholder="250000">
+                            </label>
+                            <label class="field">
+                                <span>Max Price</span>
+                                <input type="number" id="hero-max-price" placeholder="800000">
+                            </label>
+                            <label class="field">
+                                <span>Property Type</span>
+                                <select id="hero-property-type">
+                                    <option value="">All Types</option>
+                                    <option value="house">House</option>
+                                    <option value="apartment">Apartment</option>
+                                    <option value="condo">Condo</option>
+                                    <option value="townhouse">Townhouse</option>
+                                </select>
+                            </label>
+                            <label class="field">
+                                <span>Bedrooms</span>
+                                <select id="hero-min-bedrooms">
+                                    <option value="">Any</option>
+                                    <option value="1">1+</option>
+                                    <option value="2">2+</option>
+                                    <option value="3">3+</option>
+                                    <option value="4">4+</option>
+                                </select>
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fas fa-sparkles"></i> Search with AI
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <section class="metrics-strip container">
+                <article class="metric-card">
+                    <span id="metric-properties" class="metric-value">0</span>
+                    <span class="metric-label">Curated listings</span>
+                </article>
+                <article class="metric-card">
+                    <span id="metric-available" class="metric-value">0</span>
+                    <span class="metric-label">Available now</span>
+                </article>
+                <article class="metric-card">
+                    <span id="metric-agents" class="metric-value">0</span>
+                    <span class="metric-label">Verified agents</span>
+                </article>
+                <article class="metric-card">
+                    <span id="metric-average" class="metric-value">$0</span>
+                    <span class="metric-label">Average price</span>
+                </article>
+            </section>
+        </header>
+
+        <main>
+            <div class="container">
+                <div id="global-feedback" class="feedback-banner hidden" role="status" aria-live="polite"></div>
+            </div>
+
+            <section id="ai-agents" class="section">
+                <div class="container">
+                    <div class="section-header">
+                        <span class="section-kicker">Core AI experience</span>
+                        <h2>Talk to focused real-estate AI agents</h2>
+                        <p>Switch between buyer, investment, and neighborhood specialists powered by an open-source model brain when configured.</p>
+                    </div>
+
+                    <div class="ai-stage">
+                        <div class="ai-panel">
+                            <div class="ai-panel-header">
+                                <div>
+                                    <span class="card-kicker">Shared agent room</span>
+                                    <h3>One thread, multiple specialists</h3>
+                                </div>
+                                <span id="ai-runtime-status" class="runtime-pill">Checking model brain...</span>
+                            </div>
+                            <label class="field ai-agent-select-wrap">
+                                <span>Preferred agent</span>
+                                <select id="ai-agent-select"></select>
+                            </label>
+                            <div id="ai-agent-grid" class="ai-agent-grid">
+                                <div class="state-card state-loading">Loading AI agents...</div>
+                            </div>
+
+                            <div class="conversation-panel">
+                                <div class="conversation-panel-header">
+                                    <div>
+                                        <span class="card-kicker">Saved memory</span>
+                                        <h3>Shared conversations</h3>
+                                    </div>
+                                    <button id="ai-new-conversation-btn" class="btn btn-outline" type="button">New Chat</button>
+                                </div>
+                                <p id="ai-conversation-summary" class="conversation-summary">
+                                    Sign in to save one shared thread where the best-fit specialist can respond turn by turn.
+                                </p>
+                                <div id="ai-conversation-list" class="conversation-list">
+                                    <div class="chat-empty">Sign in to unlock saved conversations.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ai-chat-shell">
+                            <div class="ai-chat-header">
+                                <div>
+                                    <span class="card-kicker">Live concierge</span>
+                                    <h3 id="ai-chat-title">AI concierge is getting ready</h3>
+                                </div>
+                                <p id="ai-chat-subtitle">Ask about fit, value, neighborhoods, or the best next property to review.</p>
+                            </div>
+
+                            <div id="ai-quick-prompts" class="quick-prompt-row"></div>
+
+                            <div id="ai-chat-messages" class="ai-chat-messages" aria-live="polite">
+                                <div class="chat-empty">
+                                    Choose a preferred agent, then start chatting. Other specialists can jump in when the question fits them better.
+                                </div>
+                            </div>
+
+                            <form id="ai-chat-form" class="ai-chat-form">
+                                <label class="field">
+                                    <span>Ask the AI agent</span>
+                                    <textarea id="ai-chat-input" rows="3" placeholder="Example: Find me a modern condo under $650k with good upside."></textarea>
+                                </label>
+                                <div class="ai-chat-actions">
+                                    <div class="chat-preferences">
+                                        <label class="streaming-toggle" for="ai-streaming-toggle">
+                                            <input id="ai-streaming-toggle" type="checkbox" checked>
+                                            <span>Stream responses</span>
+                                        </label>
+                                        <span class="chat-hint">Ask about fit, value, neighborhoods, or the strongest listings to review next.</span>
+                                    </div>
+                                    <button id="ai-send-btn" class="btn btn-primary" type="submit">
+                                        <i class="fas fa-paper-plane"></i> Send
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="search" class="section">
+                <div class="container">
+                    <div class="section-header">
+                        <span class="section-kicker">Refine your shortlist</span>
+                        <h2>Advanced filters with cleaner signals</h2>
+                        <p>Use precise filters, then jump straight into listings and AI recommendations below.</p>
+                    </div>
+
+                    <div class="search-stage">
+                        <div class="filters-panel">
+                            <div class="field-group">
+                                <label class="field">
+                                    <span>Property Type</span>
+                                    <select id="filter-property-type">
+                                        <option value="">All Types</option>
+                                        <option value="house">House</option>
+                                        <option value="apartment">Apartment</option>
+                                        <option value="condo">Condo</option>
+                                        <option value="townhouse">Townhouse</option>
+                                    </select>
+                                </label>
+                                <label class="field">
+                                    <span>Status</span>
+                                    <select id="filter-status">
+                                        <option value="">Any Status</option>
+                                        <option value="available">Available</option>
+                                        <option value="pending">Pending</option>
+                                        <option value="sold">Sold</option>
+                                    </select>
+                                </label>
+                                <label class="field">
+                                    <span>Location</span>
+                                    <input type="text" id="filter-location" placeholder="City or neighborhood">
+                                </label>
+                                <label class="field">
+                                    <span>Min Price</span>
+                                    <input type="number" id="filter-min-price" placeholder="250000">
+                                </label>
+                                <label class="field">
+                                    <span>Max Price</span>
+                                    <input type="number" id="filter-max-price" placeholder="900000">
+                                </label>
+                                <label class="field">
+                                    <span>Bedrooms</span>
+                                    <select id="filter-min-bedrooms">
+                                        <option value="">Any</option>
+                                        <option value="1">1+</option>
+                                        <option value="2">2+</option>
+                                        <option value="3">3+</option>
+                                        <option value="4">4+</option>
+                                    </select>
+                                </label>
+                            </div>
+                            <div class="filters-actions">
+                                <button id="apply-filters" class="btn btn-primary" type="button">Apply Filters</button>
+                                <button id="clear-filters" class="btn btn-outline" type="button">Clear Filters</button>
+                            </div>
+                        </div>
+
+                        <aside class="insight-card">
+                            <span class="card-kicker">Market pulse</span>
+                            <h3>AI is prioritizing homes that balance value, space, and freshness.</h3>
+                            <p id="recommendation-summary">
+                                Recommendations will update as you search, sign in, and save favorites.
+                            </p>
+                        </aside>
+                    </div>
+                </div>
+            </section>
+
+            <section id="properties" class="section section-soft">
+                <div class="container">
+                    <div class="section-header">
+                        <span class="section-kicker">Featured listings</span>
+                        <h2>Beautiful homes, ready to compare</h2>
+                        <p>Freshly ranked inventory with quick-glance pricing, features, and status.</p>
+                    </div>
+                    <div id="properties-grid" class="properties-grid">
+                        <div class="state-card state-loading">Loading properties...</div>
+                    </div>
+                    <div id="properties-pagination" class="pagination"></div>
+                </div>
+            </section>
+
+            <section id="recommendations" class="section">
+                <div class="container">
+                    <div class="section-header">
+                        <span class="section-kicker">Personalized picks</span>
+                        <h2>Recommendations with actual reasons</h2>
+                        <p>Our recommendation feed blends listing quality with your recent activity when you sign in.</p>
+                    </div>
+                    <div id="recommendations-grid" class="properties-grid">
+                        <div class="state-card state-loading">Loading recommendations...</div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="agents" class="section section-soft">
+                <div class="container">
+                    <div class="section-header">
+                        <span class="section-kicker">Human expertise</span>
+                        <h2>Talk to standout local agents</h2>
+                        <p>Verified professionals ready to help you move from browsing to buying.</p>
+                    </div>
+                    <div id="agents-grid" class="agents-grid">
+                        <div class="state-card state-loading">Loading agents...</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <div class="container footer-grid">
+                <div>
+                    <h3>Real Estate AI</h3>
+                    <p>Elegant search, trustworthy rankings, and a calmer way to discover your next home.</p>
+                </div>
+                <div>
+                    <h4>Navigate</h4>
+                    <a href="#search">Search</a>
+                    <a href="#properties">Listings</a>
+                    <a href="#recommendations">AI Picks</a>
+                    <a href="#agents">Agents</a>
+                </div>
+                <div>
+                    <h4>Contact</h4>
+                    <p>info@realestateai.com</p>
+                    <p>(555) 123-4567</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <div id="auth-modal" class="modal" aria-hidden="true">
+        <div class="modal-content">
+            <button class="close" type="button" aria-label="Close modal">&times;</button>
+            <div id="auth-tabs" class="tab-row">
+                <button class="tab-btn active" data-tab="login" type="button">Login</button>
+                <button class="tab-btn" data-tab="register" type="button">Register</button>
+            </div>
+
+            <form id="login-form" class="auth-form">
+                <h3>Welcome back</h3>
+                <p>Sign in to save favorites and shape your AI recommendations.</p>
+                <label class="field">
+                    <span>Username</span>
+                    <input type="text" id="login-username" required>
+                </label>
+                <label class="field">
+                    <span>Password</span>
+                    <input type="password" id="login-password" required>
+                </label>
+                <button type="submit" class="btn btn-primary btn-block">Login</button>
+            </form>
+
+            <form id="register-form" class="auth-form hidden">
+                <h3>Create your account</h3>
+                <p>Register to save favorites and build a smarter recommendation profile.</p>
+                <label class="field">
+                    <span>Username</span>
+                    <input type="text" id="register-username" required>
+                </label>
+                <label class="field">
+                    <span>Email</span>
+                    <input type="email" id="register-email" required>
+                </label>
+                <label class="field">
+                    <span>Password</span>
+                    <input type="password" id="register-password" required>
+                </label>
+                <label class="field">
+                    <span>User Type</span>
+                    <select id="register-user-type">
+                        <option value="buyer">Buyer</option>
+                        <option value="seller">Seller</option>
+                        <option value="agent">Agent</option>
+                    </select>
+                </label>
+                <button type="submit" class="btn btn-primary btn-block">Register</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="property-modal" class="modal" aria-hidden="true">
+        <div class="modal-content modal-large">
+            <button class="close" type="button" aria-label="Close modal">&times;</button>
+            <div id="property-detail" class="property-detail"></div>
+        </div>
+    </div>
+
+    <button id="scroll-to-top" class="scroll-to-top" type="button" aria-label="Scroll to top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

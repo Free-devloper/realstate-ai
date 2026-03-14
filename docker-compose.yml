@@ -1,0 +1,34 @@
+﻿services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: realestateai-web
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: sqlite:////app/data/app.db
+      LLAMA_CPP_URL: http://host.docker.internal:8080/v1/chat/completions
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "5002:5000"
+    volumes:
+      - realestateai-data:/app/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/api/overview', timeout=5)"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    init: true
+    restart: unless-stopped
+
+volumes:
+  realestateai-data:

@@ -1,0 +1,16 @@
+.git
+.gitignore
+.pytest_tmp
+.vscode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.log
+tests/
+server.out.log
+server.err.log
+pytest_tmp/
+pytest-cache-files-*/
+.env
